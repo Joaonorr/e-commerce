@@ -20,6 +20,7 @@ config();
       // migrations: ["dist/src/migrations/*{.ts,.js}"],
       // Migration: [Category],
       synchronize: true,
+      logging: true,
     }),
     CategoryModule
   ],
