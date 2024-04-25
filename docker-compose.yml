@@ -1,0 +1,34 @@
+networks:
+  docker-ecommerce-network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+    container_name: ecommerce-postgresDB
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - docker-ecommerce-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce-service
+    # environment:
+    #   - PORT=${PORT}
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    # volumes:
+    #   - ./src:/app/src
+    networks:
+      - docker-ecommerce-network

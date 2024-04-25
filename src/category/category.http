@@ -1,0 +1,23 @@
+### list categories
+GET http://localhost:3000/api/category
+
+### get category by id
+GET http://localhost:3000/api/category/1
+
+### create category
+POST http://localhost:3000/api/category
+Content-Type: application/json
+
+{
+    "name": "category name",
+    "image_link": "image link"
+}
+
+### update category
+PUT http://localhost:3000/api/category/1
+{
+    "name": "category name"
+}
+
+### delete category
+DELETE http://localhost:3000/api/category/1
