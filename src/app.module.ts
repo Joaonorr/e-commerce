@@ -20,7 +20,7 @@ config();
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
       // migrations: ["dist/src/migrations/*{.ts,.js}"],
       // Migration: [Category],
-      synchronize: true,
+      synchronize: `${process.env.DATABASE_SYNCHRONIZE}` === 'true' ? true : false,
       logging: true,
     }),
     CategoryModule,
