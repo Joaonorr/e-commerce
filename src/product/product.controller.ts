@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,7 +21,7 @@ export class ProductController {
   async create(@Body() createProductDto: CreateProductDto) {
     const category = await this.categoryService.findOne(createProductDto.category_id.id);
 
-    if (!category) return { message: 'Category not found' };
+    if (!category) throw new NotFoundException('Category not found');
 
     return await this.productService.create(createProductDto);
   }
@@ -52,7 +52,7 @@ export class ProductController {
   findOne(@Param('id') id: number) {
     const product = this.productService.findOne(id);
 
-    if (!product) return { message: 'Product not found' };
+    if (!product) throw new NotFoundException('Product not found');
 
     return product;
   }
@@ -65,12 +65,12 @@ async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto
 
   if (updateProductDto.category_id) {
     const category = await this.categoryService.findOne(updateProductDto.category_id.id);
-    if (!category) return { message: 'Category not found' };
+    if (!category) throw new NotFoundException('Category not found');
   }
 
   const product = await this.productService.update(+id, updateProductDto);
 
-  if (!product) return { message: 'Product not found' };
+  if (!product) throw new NotFoundException('Product not found');
 
   return product;
 }
@@ -82,7 +82,7 @@ async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto
   remove(@Param('id') id: number) {
     const product = this.productService.remove(id);
 
-    if (!product) return { message: 'Product not found' };
+    if (!product) throw new NotFoundException('Product not found');
 
     return { message: 'Product deleted successfully' };
   }
