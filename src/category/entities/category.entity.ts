@@ -11,9 +11,9 @@ export class Category {
     @Column()
     image_link : string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({type: 'timestamp'})
     date_created : string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({type: 'timestamp', onUpdate: 'CURRENT_TIMESTAMP'})
     date_updated : string;
 }
