@@ -17,7 +17,7 @@ export class Product {
         category => category.id,
         {onDelete: 'SET NULL', nullable: false}
     )
-    category_id: Category;
+    category_id: number;
 
     @Column({length: 250, nullable: false})
     description : string;

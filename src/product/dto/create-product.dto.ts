@@ -13,7 +13,7 @@ export class CreateProductDto {
 
     @ApiProperty()
     @IsNumber()
-    category_id: Category;
+    category_id: number;
 
     @ApiProperty()
     @IsString()

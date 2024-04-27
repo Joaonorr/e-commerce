@@ -19,7 +19,7 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto) {
 
-    const category = await this.categoryRepository.findOneBy({ id: createProductDto.category_id.id });
+    const category = await this.categoryRepository.findOneBy({ id: createProductDto.category_id });
 
     if (!category) return null;
 
@@ -62,11 +62,7 @@ export class ProductService {
     }
 
     return await this.productRepository.find({
-      where: {
-        category_id: {
-          id: category_id
-        } 
-      },
+      where: { category_id },
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -77,7 +73,7 @@ export class ProductService {
 
     if (!product) return null;
 
-    const category = await this.categoryRepository.findOneBy({ id: updateProductDto.category_id.id });
+    const category = await this.categoryRepository.findOneBy({ id: updateProductDto.category_id });
 
     if (!category) return null;
 

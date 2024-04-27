@@ -43,12 +43,24 @@ export class CategoryController {
     return await this.categoryService.findOne(+id);
   }
 
+  @Get('name/:name')
+  @ApiOperation({ summary: 'Get a category by name' })
+  @ApiResponse({ status: 200, description: 'Return the category.' })
+  @ApiResponse({ status: 404, description: 'Category not found.' })
+  async findOneByName(@Param('name') name: string) {
+    return await this.categoryService.findOneByName(name);
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update a category' })
   @ApiResponse({ status: 200, description: 'Category successfully updated.' })
   @ApiResponse({ status: 404, description: 'Category not found.' })
   async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return await this.categoryService.update(+id, updateCategoryDto);
+    const category = await this.categoryService.update(+id, updateCategoryDto);
+
+    if (!category) throw new NotFoundException('Category not found');
+
+    return category;
   }
 
   @Delete(':id')

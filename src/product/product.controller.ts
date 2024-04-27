@@ -19,7 +19,7 @@ export class ProductController {
   @ApiResponse({ status: 400, description: 'Bad Request.' })
 
   async create(@Body() createProductDto: CreateProductDto) {
-    const category = await this.categoryService.findOne(createProductDto.category_id.id);
+    const category = await this.categoryService.findOne(createProductDto.category_id);
 
     if (!category) throw new NotFoundException('Category not found');
 
@@ -64,7 +64,7 @@ export class ProductController {
 async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
 
   if (updateProductDto.category_id) {
-    const category = await this.categoryService.findOne(updateProductDto.category_id.id);
+    const category = await this.categoryService.findOne(updateProductDto.category_id);
     if (!category) throw new NotFoundException('Category not found');
   }
 
