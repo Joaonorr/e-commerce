@@ -64,7 +64,9 @@ export class ProductController {
 async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
 
   if (updateProductDto.category_id) {
-    const category = await this.categoryService.findOne(updateProductDto.category_id);
+    const category = await this.categoryService.findOne(+updateProductDto.category_id);
+    console.log(category);
+    console.log(updateProductDto.category_id);
     if (!category) throw new NotFoundException('Category not found');
   }
 

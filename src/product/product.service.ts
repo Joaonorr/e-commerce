@@ -68,6 +68,12 @@ export class ProductService {
     });
   }
 
+  async findAllByCategory(category_id: number) {
+    return await this.productRepository.find({
+      where: { category_id }
+    });
+  }
+
   async update(id: number, updateProductDto: UpdateProductDto) {
     const product = await this.productRepository.findOneBy({ id });
 
@@ -82,7 +88,11 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: number) {
+    const product = await this.productRepository.findOneBy({ id });
+
+    if (!product) return null;
+
+    return this.productRepository.remove(product);
   }
 }
