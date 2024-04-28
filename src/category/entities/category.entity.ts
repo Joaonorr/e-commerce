@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn } from "typeorm";
+import { after } from "node:test";
+import { Product } from "src/product/entities/product.entity";
+import { AfterUpdate, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Category {
@@ -12,8 +14,23 @@ export class Category {
     image_link : string;
 
     @CreateDateColumn({type: 'timestamp'})
-    date_created : string;
+    date_created : Date;
 
-    @CreateDateColumn({type: 'timestamp', onUpdate: 'CURRENT_TIMESTAMP'})
-    date_updated : string;
+    @UpdateDateColumn({type: 'timestamp', onUpdate: 'CURRENT_TIMESTAMP'})
+    date_updated : Date;
+
+    @OneToMany(() => Product, product => product.categoryId)
+    products: Product[];
+
+
+    // @BeforeUpdate()
+    // public setUpdateDate(): void {
+    //     this.date_updated = new Date();
+    // }
+
+    @AfterUpdate()
+    public setUpdateDate(): void {
+        this.date_updated = new Date();
+    }
+
 }

@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { Category } from 'src/category/entities/category.entity';
+import { CreateProductServiceDto } from './dto/create-product-service.dto';
 
 @Injectable()
 export class ProductService {
@@ -19,13 +20,15 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto) {
 
-    const category = await this.categoryRepository.findOneBy({ id: createProductDto.category_id });
+    console.log(createProductDto.categoryId);
 
-    if (!category) return null;
+    const category = await this.categoryRepository.findOneBy({ id: +createProductDto.categoryId });
 
-    createProductDto.category_id
+    const _product = new CreateProductServiceDto(createProductDto);
 
-    const product = this.productRepository.create(createProductDto);
+    _product.categoryId = category.id;
+
+    const product = this.productRepository.create(_product);
 
     return await this.productRepository.save(product);  
   }
@@ -35,7 +38,9 @@ export class ProductService {
   }
 
   async findOne(id: number) {
-    const product = this.productRepository.findOneBy({ id });
+    const product = await this.productRepository.findOneBy({ id });
+
+    console.log(product + "service");
 
     if (!product) return null;
 
@@ -49,29 +54,34 @@ export class ProductService {
     });
   }
 
-  async findAllFilte(page: number, limit: number, category_id: number) {
-
+  async findAllFilte(page: number, limit: number, categoryId: number) {
     page = page || 1;
     limit = limit || 10;
-
-    if (category_id == 0) {
-      return await this.productRepository.find({
-        skip: (page - 1) * limit,
-        take: limit,
-      });
+  
+    const queryBuilder = this.productRepository.createQueryBuilder('product');
+  
+    // queryBuilder.leftJoinAndSelect('product.categoryId', 'category');
+  
+    if (categoryId != 0) {
+      queryBuilder.where('product.categoryId = :categoryId', { categoryId });
     }
-
-    return await this.productRepository.find({
-      where: { category_id },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+  
+    return await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
   }
 
   async findAllByCategory(category_id: number) {
-    return await this.productRepository.find({
-      where: { category_id }
-    });
+    const category = await this.categoryRepository.findOneBy({ id: category_id });
+
+    if (!category) return null;
+
+    const queryBuilder = this.productRepository.createQueryBuilder('product');
+
+    queryBuilder.where('product.category_id = :category_id', { category_id });
+
+    return await queryBuilder.getMany();
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
@@ -79,11 +89,15 @@ export class ProductService {
 
     if (!product) return null;
 
-    const category = await this.categoryRepository.findOneBy({ id: updateProductDto.category_id });
+    const category = await this.categoryRepository.findOneBy({ id: updateProductDto.categoryId });
 
     if (!category) return null;
 
-    this.productRepository.merge(product, updateProductDto);
+    const _product = new CreateProductServiceDto(updateProductDto);
+
+    _product.categoryId = category.id
+
+    this.productRepository.merge(product, _product);
 
     return this.productRepository.save(product);
   }

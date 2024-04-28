@@ -30,6 +30,22 @@ export class CategoryService {
     });
   }
 
+  async findAllFilte(page: number, limit: number, id: number) {
+    page = page || 1;
+    limit = limit || 10;
+  
+    const queryBuilder = this.categoryRepository.createQueryBuilder('category');
+  
+    if (id != 0) {
+      queryBuilder.where('category.id = :id', { id });
+    }
+  
+    return await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+  }
+
   async findOne(id: number) {
     return await this.categoryRepository.findOneBy({ id });
   }

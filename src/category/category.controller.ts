@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, NotFoundException, Query, Optional } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProductService } from 'src/product/product.service';
 
 @ApiTags('Category')
@@ -29,14 +29,27 @@ export class CategoryController {
     return await this.categoryService.findAll();
   }
 
-  @Get('page/:page?/limit/:limit?')
-  @ApiOperation({ summary: 'Get paginated categories' })
+  @Get('filter/')
+  @ApiOperation({ 
+    summary: 'Get paginated categories',
+    description: '<h2><font color="red">If the query parameter "categoryId" is 0 or not provided, this endpoint will return all categories.<br> If a specific "categoryId" is provided, it will return the category with that ID.</font></h2>'
+  })
   @ApiResponse({ status: 200, description: 'Return paginated categories.' })
+  @ApiQuery({ name: 'page', required: false, example: '1' })
+  @ApiQuery({ name: 'limit', required: false, example: '10' })
+  @ApiQuery({ name: 'categoryId', required: false, example: '0' })
   async findAllPaginated(
-    @Param('page') page: string = '1',
-    @Param('limit') limit: string = '10'
+    @Query('page') 
+    page: string = '1',
+
+    @Query('limit')
+    limit: string = '10',
+
+    @Query('categoryId')
+    categoryId: string = '0'
+    
   ) {
-    return await this.categoryService.findAllPaginated(+page, +limit);
+    return await this.categoryService.findAllFilte(+page, +limit, +categoryId);
   }
 
   @Get(':id')
@@ -78,10 +91,12 @@ export class CategoryController {
   @HttpCode(204)
   async remove(@Param('id') id: string) {
 
-    const products = await this.productService.findAllByCategory(+id);
+    const products = await this.productService.findAllFilte(1, 1, +id);
 
-    if (products.length > 0) {
-      return { message: 'Category has products. Cannot delete.' };
+    console.log(products.length);
+
+    if (+products.length > 0) {
+      throw new NotFoundException('Category cannot be deleted because it is associated with a product');
     }
 
     const category = await this.categoryService.remove(+id);

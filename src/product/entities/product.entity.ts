@@ -1,5 +1,5 @@
 import { Category } from "src/category/entities/category.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Product {
@@ -12,12 +12,19 @@ export class Product {
     @Column({length: 10, nullable: false})
     sku : string;
 
-    @ManyToOne(
-        () => Category,
-        category => category.id,
-        {onDelete: 'SET NULL', nullable: false}
-    )
-    category_id: number;
+    // @ManyToOne(
+    //     () => Category,
+    //     category => category.id,
+    //     {onDelete: 'SET NULL', nullable: false}
+    // )
+    // category_id: Category;
+
+    @ManyToOne(() => Category)
+    @JoinColumn({ name: 'categoryId' })
+    category: Category;
+
+    @Column()
+    categoryId: number;
 
     @Column({length: 250, nullable: false})
     description : string;
