@@ -54,6 +54,18 @@ export class ProductController {
   @ApiQuery({ name: 'page', required: false, example: '1' })
   @ApiQuery({ name: 'limit', required: false, example: '10' })
   @ApiQuery({ name: 'categoryId', required: false, example: '0' })
+  @ApiQuery({
+    name: 'attributeOrder',
+    required: false,
+    example: 'id',
+    enum: ['id', 'name', 'price', 'discount'],
+  })
+  @ApiQuery({
+    name: 'order',
+    required: false,
+    example: 'ASC',
+    enum: ['ASC', 'DESC'],
+  })
   async findAllPaginated(
     @Query('page')
     page: string = '1',
@@ -63,8 +75,27 @@ export class ProductController {
 
     @Query('categoryId')
     categoryId: string = '0',
+
+    @Query('attributeOrder')
+    attributeOrder: string = 'id',
+
+    @Query('order')
+    order: string = 'ASC',
   ) {
-    return await this.productService.findAllFilte(+page, +limit, +categoryId);
+    const attributes = ['id', 'name', 'price', 'discount'];
+
+    if (!attributes.includes(attributeOrder))
+      throw new NotFoundException('Invalid attributeOrder');
+
+    if (attributeOrder === 'discount') attributeOrder = 'discount_price';
+
+    return await this.productService.findAllFilte(
+      +page,
+      +limit,
+      +categoryId,
+      attributeOrder,
+      order,
+    );
   }
 
   @Get(':id')

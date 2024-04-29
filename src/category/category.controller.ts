@@ -44,13 +44,12 @@ export class CategoryController {
   @Get('filter/')
   @ApiOperation({
     summary: 'Get paginated categories',
-    description:
-      '<h2><font color="red">If the query parameter "categoryId" is 0 or not provided, this endpoint will return all categories.<br> If a specific "categoryId" is provided, it will return the category with that ID.</font></h2>',
   })
   @ApiResponse({ status: 200, description: 'Return paginated categories.' })
   @ApiQuery({ name: 'page', required: false, example: '1' })
   @ApiQuery({ name: 'limit', required: false, example: '10' })
-  @ApiQuery({ name: 'categoryId', required: false, example: '0' })
+  @ApiQuery({ name: 'attributeOrder', required: false, example: 'id' })
+  @ApiQuery({ name: 'order', required: false, example: 'ASC' })
   async findAllPaginated(
     @Query('page')
     page: string = '1',
@@ -58,10 +57,18 @@ export class CategoryController {
     @Query('limit')
     limit: string = '10',
 
-    @Query('categoryId')
-    categoryId: string = '0',
+    @Query('attributeOrder')
+    attributeOrder: string = 'id',
+
+    @Query('order')
+    order: string = 'ASC',
   ) {
-    return await this.categoryService.findAllFilte(+page, +limit, +categoryId);
+    return await this.categoryService.findAllFilte(
+      +page,
+      +limit,
+      attributeOrder,
+      order,
+    );
   }
 
   @Get(':id')
@@ -107,9 +114,9 @@ export class CategoryController {
   async remove(@Param('id') id: string) {
     const products = await this.productService.findAllFilte(1, 1, +id);
 
-    console.log(products.length);
+    console.log(products.itemCount);
 
-    if (+products.length > 0) {
+    if (+products.itemCount > 0) {
       throw new NotFoundException(
         'Category cannot be deleted because it is associated with a product',
       );

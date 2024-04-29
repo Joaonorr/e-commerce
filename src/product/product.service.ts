@@ -9,20 +9,20 @@ import { CreateProductServiceDto } from './dto/create-product-service.dto';
 
 @Injectable()
 export class ProductService {
-
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
 
     @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-
     console.log(createProductDto.categoryId);
 
-    const category = await this.categoryRepository.findOneBy({ id: +createProductDto.categoryId });
+    const category = await this.categoryRepository.findOneBy({
+      id: +createProductDto.categoryId,
+    });
 
     const _product = new CreateProductServiceDto(createProductDto);
 
@@ -30,7 +30,7 @@ export class ProductService {
 
     const product = this.productRepository.create(_product);
 
-    return await this.productRepository.save(product);  
+    return await this.productRepository.save(product);
   }
 
   async findAll() {
@@ -40,7 +40,7 @@ export class ProductService {
   async findOne(id: number) {
     const product = await this.productRepository.findOneBy({ id });
 
-    console.log(product + "service");
+    console.log(product + 'service');
 
     if (!product) return null;
 
@@ -54,26 +54,41 @@ export class ProductService {
     });
   }
 
-  async findAllFilte(page: number, limit: number, categoryId: number) {
-    page = page || 1;
-    limit = limit || 10;
-  
+  async findAllFilte(
+    page: number = 1,
+    limit: number = 10,
+    categoryId: number,
+    attributeOrder: string = 'id',
+    order: string = 'ASC',
+  ) {
+    order =
+      order.toUpperCase() === 'ASC' || order.toUpperCase() === 'DESC'
+        ? order.toUpperCase()
+        : 'ASC';
+
     const queryBuilder = this.productRepository.createQueryBuilder('product');
-  
-    // queryBuilder.leftJoinAndSelect('product.categoryId', 'category');
-  
+
     if (categoryId != 0) {
       queryBuilder.where('product.categoryId = :categoryId', { categoryId });
     }
-  
-    return await queryBuilder
+
+    queryBuilder.orderBy(attributeOrder, order as 'ASC' | 'DESC');
+
+    const [items, itemCount] = await queryBuilder
       .skip((page - 1) * limit)
       .take(limit)
-      .getMany();
+      .getManyAndCount();
+
+    return {
+      items,
+      itemCount,
+    };
   }
 
   async findAllByCategory(category_id: number) {
-    const category = await this.categoryRepository.findOneBy({ id: category_id });
+    const category = await this.categoryRepository.findOneBy({
+      id: category_id,
+    });
 
     if (!category) return null;
 
@@ -89,13 +104,15 @@ export class ProductService {
 
     if (!product) return null;
 
-    const category = await this.categoryRepository.findOneBy({ id: updateProductDto.categoryId });
+    const category = await this.categoryRepository.findOneBy({
+      id: updateProductDto.categoryId,
+    });
 
     if (!category) return null;
 
     const _product = new CreateProductServiceDto(updateProductDto);
 
-    _product.categoryId = category.id
+    _product.categoryId = category.id;
 
     this.productRepository.merge(product, _product);
 

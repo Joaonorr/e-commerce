@@ -7,10 +7,9 @@ import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
-
   constructor(
     @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -30,16 +29,21 @@ export class CategoryService {
     });
   }
 
-  async findAllFilte(page: number, limit: number, id: number) {
-    page = page || 1;
-    limit = limit || 10;
-  
+  async findAllFilte(
+    page: number = 1,
+    limit: number = 10,
+    attributeOrder: string = 'id',
+    order: string = 'ASC',
+  ) {
+    order =
+      order.toUpperCase() === 'ASC' || order.toUpperCase() === 'DESC'
+        ? order.toUpperCase()
+        : 'ASC';
+
     const queryBuilder = this.categoryRepository.createQueryBuilder('category');
-  
-    if (id != 0) {
-      queryBuilder.where('category.id = :id', { id });
-    }
-  
+
+    queryBuilder.orderBy(attributeOrder, order as 'ASC' | 'DESC');
+
     return await queryBuilder
       .skip((page - 1) * limit)
       .take(limit)
